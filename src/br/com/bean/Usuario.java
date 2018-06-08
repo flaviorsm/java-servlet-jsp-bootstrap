@@ -1,11 +1,20 @@
 package br.com.bean;
 
-public class Agenda {
+public class Usuario {
     private int id; 
     private String nome;
     private String telefone;
     private String email;
+    private String senha;
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+    
     public String getNome() {
             return nome;
     }
@@ -30,11 +39,11 @@ public class Agenda {
             this.email = email;
     }
 
-    public int getId() {
-        return id;
-    }
+	public String getSenha() {
+		return senha;
+	}
 
-    public void setId(int id) {
-        this.id = id;
-    }
+	public void setSenha(String senha) {
+		this.senha = senha;
+	}
 }

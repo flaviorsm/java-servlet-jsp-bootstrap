@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1" pageEncoding="ISO-8859-1"%>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
 <!DOCTYPE html>
@@ -35,7 +36,12 @@
                                 <td><c:out value="${ contato.getEmail() }" /></td>
                                 <td><c:out value="${ contato.getTelefone() }" /></td>
                                 <td class="actions">
-                                    <a class="btn btn-danger btn-xs" href="../AgendaController?cmd=delete&id=<c:out value="${ contato.getId() }"/>" data-toggle="modal" data-target="#delete-modal">Excluir</a>
+                                	<c:if test="${fn:length(contatos) gt 1}">
+	                                    <a class="btn btn-danger btn-xs" 
+	                                    	href="../AgendaController?cmd=delete&Id=<c:out value="${contato.getId()}"/>">
+	                                    		Delete
+	                                    </a>
+                                    </c:if>
                                 </td>
                             </tr>
                         </c:forEach>
@@ -45,6 +51,5 @@
         </div> <!-- /#list --> 
     </div>
     <script src="../js/jquery.min.js"></script>
-    <script src="../js/bootstrap.min.js"></script>
 </body>
 </html>

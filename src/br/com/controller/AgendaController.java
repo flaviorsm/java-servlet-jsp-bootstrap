@@ -2,6 +2,7 @@ package br.com.controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -11,14 +12,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import br.com.bean.Agenda;
+import br.com.bean.Usuario;
 import br.com.dao.AgendaDAO;
 
 @WebServlet("/AgendaController")
 public class AgendaController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
     
-	private Agenda contato;
+	private Usuario contato;
 	private String forward = "";
 	private AgendaDAO csv;
 	
@@ -33,17 +34,23 @@ public class AgendaController extends HttpServlet {
         try {
 
             String cmd = request.getParameter("cmd");  
-
+            
             if(cmd.equalsIgnoreCase("listar")) {				
                 forward = "./pages/lista.jsp";				
-                request.setAttribute("contatos", csv.ler());				
+                request.setAttribute("contatos", csv.ler());
+                RequestDispatcher view = request.getRequestDispatcher(forward);
+                view.forward(request, response);
             }
-
-            RequestDispatcher view = request.getRequestDispatcher(forward);
-            view.forward(request, response);
+            else if(cmd.equalsIgnoreCase("delete")) {   
+                int userId = Integer.parseInt(request.getParameter("Id"));
+                if(csv.ler().size() > 1) {
+                	csv.excluirLinha(userId);                                        
+                }
+                response.sendRedirect("./pages/agenda.jsp");
+             }
 
         } catch (Exception e) {
-                pw.println("Erro: " + e.getMessage()); 
+            pw.println("Exception: " + e); 
         }
     }
 	
@@ -54,21 +61,26 @@ public class AgendaController extends HttpServlet {
 
         String cmd = request.getParameter("cmd");  
 
-        if(cmd.equalsIgnoreCase("login")) {
-        	           
-            String usuario = request.getParameter("inputUsuario");
+        if(cmd.equalsIgnoreCase("login")) {        	           
             String email = request.getParameter("inputEmail");
             String senha = request.getParameter("inputPassword");
-                       
-            if(email.equals("admin@admin.com") && senha.equals("admin")) {
-            	
-            	Cookie loginCookie = new Cookie("usuario", usuario);
-                loginCookie.setMaxAge(30*60);
-    			response.addCookie(loginCookie);
-    			
-                response.sendRedirect("pages/agenda.jsp");
+            AgendaDAO dao = new AgendaDAO();
+            List<Usuario> contatos = null;
+            contatos = dao.ler();
+            boolean valido = false;
+            for(Usuario u: contatos) {
+            	if(email.equals(u.getEmail()) && senha.equals(u.getSenha())) {
+            		Cookie loginCookie = new Cookie("usuario", u.getNome());
+                    loginCookie.setMaxAge(30*60);
+        			response.addCookie(loginCookie);
+        			valido = true;        			
+            	}
             }
-            else {
+            if(valido) {
+            	
+            	response.sendRedirect("pages/agenda.jsp");
+            	
+            } else {
             	response.setContentType("text/html");
                 PrintWriter pw = response.getWriter();
                 pw.println("<div class=\"container\">\r\n" + 
@@ -83,26 +95,23 @@ public class AgendaController extends HttpServlet {
             }	     		
          } 
          else if(cmd.equalsIgnoreCase("cadastrar")){  
-            contato = new Agenda();
+            contato = new Usuario();
+            
             contato.setId(0);
             contato.setNome(request.getParameter("nome"));
             contato.setEmail(request.getParameter("email"));
             contato.setTelefone(request.getParameter("tel"));
-
+            contato.setSenha(request.getParameter("inputPassword"));
+            
             csv.inserirLinha(contato);
 
             response.sendRedirect("./pages/agenda.jsp");	            	            
-         }
-         else if(cmd.equalsIgnoreCase("delete")) {              
-            int userId = Integer.parseInt(request.getParameter("id"));
-            csv.excluirLinha(userId);
-            request.setAttribute("contatos", csv.ler());
-         }
+         }         
 
         }catch (Exception e) {  
         	response.setContentType("text/html");
             PrintWriter pw = response.getWriter();
-            pw.println(e.getMessage());
+            pw.println(e);
             pw.close();
         }  
     }
